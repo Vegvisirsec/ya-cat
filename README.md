@@ -8,6 +8,15 @@
 
 Portable Conditional Access policy definitions, deployment helpers, export utilities, and reviewer guidance for Microsoft 365 environments.
 
+## What it does
+
+Core things this repo is for:
+
+1. Deploy the preset Conditional Access policies from this repo to a target tenant, either all of them or selected bundles/policies.
+2. Pull Conditional Access policies from a target tenant and store them locally as JSON.
+3. Compare/evaluate the target tenant policy set against the repo policy set and show what coverage is missing.
+4. Pull recent sign-in locations from the target tenant and turn them into a named location.
+
 ## Design approach
 
 This toolkit loosely follows a persona-based Conditional Access design approach, but it is not a pure persona model. The policy tiers reflect both user shape and license capability: baseline and managed controls can be thought of as sub-personas of the "typical user", while frontline and E5 extend that model for materially different operating patterns or higher-capability license estates.
@@ -19,6 +28,12 @@ This toolkit loosely follows a persona-based Conditional Access design approach,
 - target-group and exclusion-group reference material
 - per-policy reviewer instructions for structured assessment work
 - local evaluation inputs for offline LLM or human review
+
+## Local LLM use
+
+The repository includes reusable evaluation instructions and context-package exports intended for use with a local LLM or human reviewer.
+
+That prompt content exists in the repo today, but the repo does not yet include an LLM execution engine or end-to-end runner that performs the evaluation automatically.
 
 ## Safety defaults
 
