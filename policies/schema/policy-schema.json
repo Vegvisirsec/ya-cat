@@ -1,0 +1,367 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Entra Conditional Access Policy Definition",
+  "description": "Schema for policy definitions in the CA targeting toolkit",
+  "type": "object",
+  "required": [
+    "id",
+    "displayName",
+    "tier",
+    "conditions"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Policy identifier in format CA-XX-NNN",
+      "pattern": "^CA-[A-Z]{2}-[0-9]{3}$"
+    },
+    "displayName": {
+      "type": "string",
+      "description": "Human-readable policy name",
+      "minLength": 1,
+      "maxLength": 250
+    },
+    "tier": {
+      "type": "string",
+      "enum": [
+        "baseline",
+        "managed",
+        "frontline",
+        "e5"
+      ],
+      "description": "Policy tier classification"
+    },
+    "optional": {
+      "type": "boolean",
+      "description": "Whether policy is optional (default: false)",
+      "default": false
+    },
+    "path": {
+      "type": "string",
+      "description": "Relative path to policy file for reference"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Optional implementation or rollout notes"
+    },
+    "deploy": {
+      "type": "boolean",
+      "description": "Whether the policy is intended for deployment by default"
+    },
+    "licenseCapability": {
+      "type": "string",
+      "enum": [
+        "P1",
+        "P2"
+      ],
+      "description": "Required license level"
+    },
+    "target": {
+      "type": "object",
+      "description": "Target user/group/role definitions",
+      "properties": {
+        "includeGroupNames": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Group names to include (e.g., CA-Tier-Baseline)"
+        },
+        "excludeGroupNames": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Group names to exclude"
+        },
+        "includeRoleTemplateIds": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+          },
+          "description": "Entra role template IDs to include"
+        },
+        "excludeRoleTemplateIds": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+          },
+          "description": "Entra role template IDs to exclude"
+        }
+      }
+    },
+    "conditions": {
+      "type": "object",
+      "description": "Conditional Access policy conditions",
+      "required": [],
+      "properties": {
+        "clientAppTypes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "all",
+              "browser",
+              "mobileAppsAndDesktopClients",
+              "exchangeActiveSync",
+              "other"
+            ]
+          },
+          "description": "Client app types targeted"
+        },
+        "users": {
+          "type": "object",
+          "properties": {
+            "includeUsers": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "User scopes or IDs to include"
+            },
+            "excludeUsers": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "User scopes or IDs to exclude"
+            },
+            "includeGroups": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "Group object IDs to include"
+            },
+            "excludeGroups": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "Group object IDs to exclude (break-glass goes here)"
+            }
+          }
+        },
+        "applications": {
+          "type": "object",
+          "properties": {
+            "includeApplications": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "Application IDs or app names to include"
+            },
+            "excludeApplications": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "Application IDs or app names to exclude"
+            },
+            "includeUserActions": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "User actions to include"
+            }
+          }
+        },
+        "clientApplications": {
+          "type": "object",
+          "properties": {
+            "includeAgentIdServicePrincipals": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "Agent identities to include, or All"
+            },
+            "excludeAgentIdServicePrincipals": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "Agent identities to exclude"
+            }
+          }
+        },
+        "platforms": {
+          "type": "object",
+          "properties": {
+            "includePlatforms": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "excludePlatforms": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "locations": {
+          "type": "object",
+          "properties": {
+            "includeLocations": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "excludeLocations": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "deviceStates": {
+          "type": "object",
+          "properties": {
+            "includeDeviceStates": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "excludeDeviceStates": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "risks": {
+          "type": "object",
+          "properties": {
+            "signInRisk": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "userRisk": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "authenticationFlows": {
+          "type": "object",
+          "properties": {
+            "transferMethods": {
+              "type": "string",
+              "description": "Authentication flow transfer method"
+            }
+          }
+        }
+      }
+    },
+    "grantControls": {
+      "type": "object",
+      "description": "Grant control requirements",
+      "properties": {
+        "operator": {
+          "type": "string",
+          "enum": [
+            "AND",
+            "OR"
+          ],
+          "description": "Logical operator for grant controls"
+        },
+        "builtInControls": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "block",
+              "mfa",
+              "approvedApplication",
+              "compliantDevice",
+              "domainJoinedDevice",
+              "passwordChange"
+            ]
+          },
+          "description": "Built-in grant controls to require"
+        },
+        "authenticationStrengthPolicyName": {
+          "type": "string",
+          "description": "Authentication strength policy name (e.g., 'Phishing-resistant MFA')"
+        },
+        "customAuthenticationFactors": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Custom authentication factor IDs"
+        }
+      }
+    },
+    "sessionControls": {
+      "type": "object",
+      "description": "Session control requirements",
+      "properties": {
+        "cloudAppSecurity": {
+          "type": "object",
+          "properties": {
+            "isEnabled": {
+              "type": "boolean"
+            },
+            "cloudAppSecurityType": {
+              "type": "string"
+            }
+          }
+        },
+        "applicationEnforcedRestrictions": {
+          "type": "object",
+          "properties": {
+            "isEnabled": {
+              "type": "boolean"
+            }
+          }
+        },
+        "persistentBrowser": {
+          "type": "object",
+          "properties": {
+            "isEnabled": {
+              "type": "boolean"
+            },
+            "mode": {
+              "type": "string",
+              "enum": [
+                "always",
+                "never"
+              ]
+            }
+          }
+        },
+        "signInFrequency": {
+          "type": "object",
+          "properties": {
+            "isEnabled": {
+              "type": "boolean"
+            },
+            "type": {
+              "type": "string"
+            },
+            "value": {
+              "type": "integer"
+            }
+          }
+        }
+      }
+    }
+  },
+  "additionalProperties": false
+}

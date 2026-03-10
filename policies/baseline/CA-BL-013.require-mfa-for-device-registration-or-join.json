@@ -1,0 +1,33 @@
+{
+    "id":  "CA-BL-013",
+    "displayName":  "CA-BL-013 - Require MFA for Device Registration or Join",
+    "tier":  "baseline",
+    "optional":  false,
+    "deploy":  true,
+    "path":  "policies/baseline/CA-BL-013.require-mfa-for-device-registration-or-join.json",
+    "target":  {
+
+               },
+    "conditions":  {
+                       "clientAppTypes":  [
+                                              "all"
+                                          ],
+                       "users":  {
+                                     "includeUsers":  [
+                                                          "All"
+                                                      ]
+                                 },
+                       "applications":  {
+                                            "includeUserActions":  [
+                                                                       "urn:user:registerdevice"
+                                                                   ]
+                                        }
+                   },
+    "grantControls":  {
+                          "builtInControls":  [
+                                                  "mfa"
+                                              ],
+                          "operator":  "OR"
+                      }
+}
+

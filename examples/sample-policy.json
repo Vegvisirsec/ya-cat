@@ -1,0 +1,8 @@
+{
+  "id": "CA001",
+  "name": "Block Legacy Authentication",
+  "tier": "baseline",
+  "state": "reportOnly",
+  "targetGroup": "CA-Tier-Baseline",
+  "status": "planned"
+}

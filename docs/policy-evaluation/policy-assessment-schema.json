@@ -1,0 +1,99 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/entra-ca-targeting-toolkit/policy-assessment-schema.json",
+  "title": "Conditional Access Policy-Level Assessment",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "policy_id",
+    "policy_display_name",
+    "assessment_summary",
+    "implementation_status",
+    "material_effectiveness",
+    "evidence",
+    "tenant_context_used",
+    "acceptable_variation_observed",
+    "concerns",
+    "recommended_action",
+    "confidence",
+    "assumptions"
+  ],
+  "properties": {
+    "policy_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "policy_display_name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "assessment_summary": {
+      "type": "string",
+      "minLength": 1
+    },
+    "implementation_status": {
+      "type": "string",
+      "enum": [
+        "aligned",
+        "aligned-with-variation",
+        "partial",
+        "missing",
+        "unclear"
+      ]
+    },
+    "material_effectiveness": {
+      "type": "string",
+      "enum": [
+        "effective",
+        "effective-with-review",
+        "reduced",
+        "material-gap"
+      ]
+    },
+    "evidence": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "tenant_context_used": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "acceptable_variation_observed": {
+      "type": "boolean"
+    },
+    "concerns": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "recommended_action": {
+      "type": "string",
+      "minLength": 1
+    },
+    "confidence": {
+      "type": "string",
+      "enum": [
+        "high",
+        "medium",
+        "low"
+      ]
+    },
+    "assumptions": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    }
+  }
+}

@@ -1,0 +1,43 @@
+{
+    "id":  "CA-MG-101",
+    "path":  "policies/managed/CA-MG-101.require-compliant-device-for-m365-browser-access.json",
+    "target":  {
+                   "includeGroupNames":  [
+                                             "CA-Tier-P1-Managed"
+                                         ],
+                   "excludeGroupNames":  [
+                                             "CA-EXC-MG-101-UnmanagedWinBrowser"
+                                         ]
+               },
+    "grantControls":  {
+                          "builtInControls":  [
+                                                  "block"
+                                              ],
+                          "operator":  "OR"
+                      },
+    "tier":  "managed",
+    "optional":  false,
+    "conditions":  {
+                       "clientAppTypes":  [
+                                              "browser"
+                                          ],
+                       "platforms":  {
+                                         "includePlatforms":  [
+                                                                  "windows"
+                                                              ]
+                                     },
+                       "devices":  {
+                                       "deviceFilter":  {
+                                                            "rule":  "(device.trustType -ne \"AzureAD\") and (device.trustType -ne \"ServerAD\")",
+                                                            "mode":  "include"
+                                                        }
+                                   },
+                       "applications":  {
+                                            "includeApplications":  [
+                                                                        "Office365"
+                                                                    ]
+                                        }
+                   },
+    "displayName":  "CA-MG-101 - Block Unmanaged Windows Devices for M365 Browser Access"
+}
+

@@ -1,0 +1,37 @@
+{
+    "id":  "CA-BL-006",
+    "displayName":  "CA-BL-006 - Block Authentication Transfer",
+    "tier":  "baseline",
+    "target":  {
+                   "excludeGroupNames":  [
+                                             "CA-EXC-BL-006-AuthenticationTransfer"
+                                         ]
+               },
+    "path":  "policies/baseline/CA-BL-006.block-authentication-transfer.json",
+    "optional":  false,
+    "conditions":  {
+                       "clientAppTypes":  [
+                                              "all"
+                                          ],
+                       "users":  {
+                                     "includeUsers":  [
+                                                          "All"
+                                                      ]
+                                 },
+                       "applications":  {
+                                            "includeApplications":  [
+                                                                        "All"
+                                                                    ]
+                                        },
+                       "authenticationFlows":  {
+                                                   "transferMethods":  "authenticationTransfer"
+                                               }
+                   },
+    "grantControls":  {
+                          "builtInControls":  [
+                                                  "block"
+                                              ],
+                          "operator":  "OR"
+                      }
+}
+

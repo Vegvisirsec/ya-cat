@@ -1,0 +1,35 @@
+{
+    "id":  "CA-FL-201",
+    "path":  "policies/frontline/CA-FL-201.require-approved-app-or-app-protection-for-frontline-mobile.json",
+    "target":  {
+                   "includeGroupNames":  [
+                                             "CA-Tier-Frontline"
+                                         ]
+               },
+    "grantControls":  {
+                          "operator":  "OR",
+                          "builtInControls":  [
+                                                  "compliantApplication"
+                                              ]
+                      },
+    "tier":  "frontline",
+    "optional":  false,
+    "conditions":  {
+                       "clientAppTypes":  [
+                                              "mobileAppsAndDesktopClients"
+                                          ],
+                       "applications":  {
+                                            "includeApplications":  [
+                                                                        "All"
+                                                                    ]
+                                        },
+                       "platforms":  {
+                                         "includePlatforms":  [
+                                                                  "android",
+                                                                  "iOS"
+                                                              ]
+                                     }
+                   },
+    "displayName":  "CA-FL-201 - Require App Protection for Frontline Mobile"
+}
+

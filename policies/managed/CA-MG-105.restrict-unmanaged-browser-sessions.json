@@ -1,0 +1,28 @@
+{
+    "id":  "CA-MG-105",
+    "sessionControls":  {
+                            "applicationEnforcedRestrictions":  {
+                                                                    "isEnabled":  true
+                                                                }
+                        },
+    "path":  "policies/managed/CA-MG-105.restrict-unmanaged-browser-sessions.json",
+    "target":  {
+                   "includeGroupNames":  [
+                                             "CA-Tier-P1-Managed"
+                                         ]
+               },
+    "tier":  "managed",
+    "optional":  false,
+    "conditions":  {
+                       "applications":  {
+                                            "includeApplications":  [
+                                                                        "Office365"
+                                                                    ]
+                                        },
+                       "clientAppTypes":  [
+                                              "browser"
+                                          ]
+                   },
+    "displayName":  "CA-MG-105 - Restrict Unmanaged Browser Sessions"
+}
+

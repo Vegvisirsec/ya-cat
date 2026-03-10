@@ -1,0 +1,235 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/entra-ca-targeting-toolkit/findings-schema.json",
+  "title": "Conditional Access Local LLM Evaluation Findings",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "executive_summary",
+    "top_findings",
+    "tenant_fit_interpretation",
+    "recommended_remediation_sequence",
+    "open_questions",
+    "overall_posture",
+    "top_3_risks",
+    "top_3_strengths",
+    "recommended_next_step",
+    "confidence_summary"
+  ],
+  "properties": {
+    "executive_summary": {
+      "type": "string",
+      "minLength": 1
+    },
+    "top_findings": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/finding"
+      }
+    },
+    "tenant_fit_interpretation": {
+      "type": "string",
+      "minLength": 1
+    },
+    "recommended_remediation_sequence": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/remediationStep"
+      }
+    },
+    "open_questions": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "overall_posture": {
+      "type": "string",
+      "enum": [
+        "strong",
+        "generally sound",
+        "mixed",
+        "weak",
+        "high concern"
+      ]
+    },
+    "top_3_risks": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 3,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "top_3_strengths": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 3,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "recommended_next_step": {
+      "type": "string",
+      "minLength": 1
+    },
+    "confidence_summary": {
+      "type": "string",
+      "minLength": 1
+    }
+  },
+  "$defs": {
+    "finding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "title",
+        "severity",
+        "category",
+        "status",
+        "evidence",
+        "tenant_context_used",
+        "why_it_matters",
+        "recommended_action",
+        "priority",
+        "confidence",
+        "assumptions"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1
+        },
+        "severity": {
+          "type": "string",
+          "enum": [
+            "critical",
+            "high",
+            "medium",
+            "low",
+            "informational"
+          ]
+        },
+        "category": {
+          "type": "string",
+          "enum": [
+            "privileged-access",
+            "mfa",
+            "legacy-authentication",
+            "device-compliance",
+            "session-control",
+            "guest-external",
+            "risk-based-policy",
+            "policy-state",
+            "exclusions",
+            "named-locations",
+            "coverage-gap",
+            "policy-overlap",
+            "governance",
+            "rollout-safety"
+          ]
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "acceptable-as-designed",
+            "acceptable-with-review",
+            "needs-attention",
+            "high-risk"
+          ]
+        },
+        "evidence": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "tenant_context_used": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "why_it_matters": {
+          "type": "string",
+          "minLength": 1
+        },
+        "recommended_action": {
+          "type": "string",
+          "minLength": 1
+        },
+        "priority": {
+          "type": "string",
+          "enum": [
+            "now",
+            "next",
+            "later"
+          ]
+        },
+        "confidence": {
+          "type": "string",
+          "enum": [
+            "high",
+            "medium",
+            "low"
+          ]
+        },
+        "assumptions": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "remediationStep": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "order",
+        "action",
+        "reason",
+        "risk_level",
+        "requires_validation"
+      ],
+      "properties": {
+        "order": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "action": {
+          "type": "string",
+          "minLength": 1
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1
+        },
+        "risk_level": {
+          "type": "string",
+          "enum": [
+            "high",
+            "medium",
+            "low"
+          ]
+        },
+        "requires_validation": {
+          "type": "boolean"
+        }
+      }
+    }
+  }
+}

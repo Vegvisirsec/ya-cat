@@ -1,0 +1,36 @@
+{
+    "id":  "CA-BL-003",
+    "displayName":  "CA-BL-003 - Require MFA or Managed Device Signal for Users",
+    "tier":  "baseline",
+    "target":  {
+                   "excludeGroupNames":  [
+                                             "CA-EXC-BL-003-User-MFAorManagedSignal"
+                                         ]
+               },
+    "path":  "policies/baseline/CA-BL-003.require-mfa-for-users.json",
+    "optional":  false,
+    "conditions":  {
+                       "clientAppTypes":  [
+                                              "all"
+                                          ],
+                       "users":  {
+                                     "includeUsers":  [
+                                                          "All"
+                                                      ]
+                                 },
+                       "applications":  {
+                                            "includeApplications":  [
+                                                                        "All"
+                                                                    ]
+                                        }
+                   },
+    "grantControls":  {
+                          "builtInControls":  [
+                                                  "mfa",
+                                                  "domainJoinedDevice",
+                                                  "compliantDevice"
+                                              ],
+                          "operator":  "OR"
+                      }
+}
+

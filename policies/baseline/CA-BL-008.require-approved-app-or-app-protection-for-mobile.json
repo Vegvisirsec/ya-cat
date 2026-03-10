@@ -1,0 +1,38 @@
+{
+    "id":  "CA-BL-008",
+    "displayName":  "CA-BL-008 - Require App Protection for Mobile",
+    "tier":  "baseline",
+    "target":  {
+
+               },
+    "path":  "policies/baseline/CA-BL-008.require-approved-app-or-app-protection-for-mobile.json",
+    "optional":  false,
+    "conditions":  {
+                       "clientAppTypes":  [
+                                              "mobileAppsAndDesktopClients"
+                                          ],
+                       "platforms":  {
+                                         "includePlatforms":  [
+                                                                  "android",
+                                                                  "iOS"
+                                                              ]
+                                     },
+                       "users":  {
+                                     "includeUsers":  [
+                                                          "All"
+                                                      ]
+                                 },
+                       "applications":  {
+                                            "includeApplications":  [
+                                                                        "All"
+                                                                    ]
+                                        }
+                   },
+    "grantControls":  {
+                          "builtInControls":  [
+                                                  "compliantApplication"
+                                              ],
+                          "operator":  "OR"
+                      }
+}
+

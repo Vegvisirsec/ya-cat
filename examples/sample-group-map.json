@@ -1,0 +1,12 @@
+{
+  "groups": [
+    {
+      "name": "CA-Tier-Baseline",
+      "description": "Baseline users"
+    },
+    {
+      "name": "CA-BreakGlass-Exclude",
+      "description": "Emergency access exclusions"
+    }
+  ]
+}

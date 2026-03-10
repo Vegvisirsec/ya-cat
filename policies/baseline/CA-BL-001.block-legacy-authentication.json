@@ -1,0 +1,33 @@
+{
+    "id":  "CA-BL-001",
+    "displayName":  "CA-BL-001 - Block Legacy Authentication",
+    "tier":  "baseline",
+    "target":  {
+
+               },
+    "path":  "policies/baseline/CA-BL-001.block-legacy-authentication.json",
+    "optional":  false,
+    "conditions":  {
+                       "clientAppTypes":  [
+                                              "exchangeActiveSync",
+                                              "other"
+                                          ],
+                       "users":  {
+                                     "includeUsers":  [
+                                                          "All"
+                                                      ]
+                                 },
+                       "applications":  {
+                                            "includeApplications":  [
+                                                                        "All"
+                                                                    ]
+                                        }
+                   },
+    "grantControls":  {
+                          "builtInControls":  [
+                                                  "block"
+                                              ],
+                          "operator":  "OR"
+                      }
+}
+

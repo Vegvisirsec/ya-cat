@@ -1,0 +1,33 @@
+{
+    "id":  "CA-E5-401",
+    "path":  "policies/e5/CA-E5-401.sign-in-risk-requires-mfa.json",
+    "target":  {
+                   "includeGroupNames":  [
+                                             "CA-Tier-E5"
+                                         ]
+               },
+    "grantControls":  {
+                          "builtInControls":  [
+                                                  "mfa"
+                                              ],
+                          "operator":  "OR"
+                      },
+    "tier":  "e5",
+    "optional":  false,
+    "conditions":  {
+                       "clientAppTypes":  [
+                                              "all"
+                                          ],
+                       "applications":  {
+                                            "includeApplications":  [
+                                                                        "All"
+                                                                    ]
+                                        },
+                       "signInRiskLevels":  [
+                                                "high",
+                                                "medium"
+                                            ]
+                   },
+    "displayName":  "CA-E5-401 - Sign-In Risk Requires MFA"
+}
+

@@ -1,0 +1,40 @@
+{
+    "id":  "CA-BL-009",
+    "displayName":  "CA-BL-009 - Block Non-Business Countries",
+    "tier":  "baseline",
+    "notes":  "Requires named location IDs before deployment.",
+    "target":  {
+
+               },
+    "path":  "policies/baseline/CA-BL-009.block-non-business-countries.json",
+    "conditions":  {
+                       "clientAppTypes":  [
+                                              "all"
+                                          ],
+                       "users":  {
+                                     "includeUsers":  [
+                                                          "All"
+                                                      ]
+                                 },
+                       "applications":  {
+                                            "includeApplications":  [
+                                                                        "All"
+                                                                    ]
+                                        },
+                       "locations":  {
+                                         "includeLocations":  [
+                                                                  "All"
+                                                              ],
+                                         "excludeLocations":  [
+                                                                  "{{BUSINESS_COUNTRIES_LOCATION_ID}}"
+                                                              ]
+                                     }
+                   },
+    "grantControls":  {
+                          "builtInControls":  [
+                                                  "block"
+                                              ],
+                          "operator":  "OR"
+                      }
+}
+

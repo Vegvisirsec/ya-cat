@@ -1,0 +1,44 @@
+{
+    "id":  "CA-BL-007",
+    "displayName":  "CA-BL-007 - Block Unsupported Device Platforms",
+    "tier":  "baseline",
+    "target":  {
+
+               },
+    "path":  "policies/baseline/CA-BL-007.block-unsupported-device-platforms.json",
+    "optional":  false,
+    "conditions":  {
+                       "clientAppTypes":  [
+                                              "all"
+                                          ],
+                       "platforms":  {
+                                         "includePlatforms":  [
+                                                                  "all"
+                                                              ],
+                                         "excludePlatforms":  [
+                                                                  "android",
+                                                                  "iOS",
+                                                                  "windows",
+                                                                  "macOS",
+                                                                  "linux"
+                                                              ]
+                                     },
+                       "users":  {
+                                     "includeUsers":  [
+                                                          "All"
+                                                      ]
+                                 },
+                       "applications":  {
+                                            "includeApplications":  [
+                                                                        "All"
+                                                                    ]
+                                        }
+                   },
+    "grantControls":  {
+                          "builtInControls":  [
+                                                  "block"
+                                              ],
+                          "operator":  "OR"
+                      }
+}
+

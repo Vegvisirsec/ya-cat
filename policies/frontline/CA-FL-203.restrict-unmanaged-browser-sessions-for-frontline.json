@@ -1,0 +1,28 @@
+{
+    "id":  "CA-FL-203",
+    "sessionControls":  {
+                            "applicationEnforcedRestrictions":  {
+                                                                    "isEnabled":  true
+                                                                }
+                        },
+    "path":  "policies/frontline/CA-FL-203.restrict-unmanaged-browser-sessions-for-frontline.json",
+    "target":  {
+                   "includeGroupNames":  [
+                                             "CA-Tier-Frontline"
+                                         ]
+               },
+    "tier":  "frontline",
+    "optional":  false,
+    "conditions":  {
+                       "applications":  {
+                                            "includeApplications":  [
+                                                                        "Office365"
+                                                                    ]
+                                        },
+                       "clientAppTypes":  [
+                                              "browser"
+                                          ]
+                   },
+    "displayName":  "CA-FL-203 - Restrict Unmanaged Browser Sessions for Frontline"
+}
+

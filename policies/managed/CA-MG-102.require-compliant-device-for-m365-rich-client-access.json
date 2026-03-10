@@ -1,0 +1,43 @@
+{
+    "id":  "CA-MG-102",
+    "path":  "policies/managed/CA-MG-102.require-compliant-device-for-m365-rich-client-access.json",
+    "target":  {
+                   "includeGroupNames":  [
+                                             "CA-Tier-P1-Managed"
+                                         ],
+                   "excludeGroupNames":  [
+                                             "CA-EXC-MG-102-UnmanagedWinRichClient"
+                                         ]
+               },
+    "grantControls":  {
+                          "builtInControls":  [
+                                                  "block"
+                                              ],
+                          "operator":  "OR"
+                      },
+    "tier":  "managed",
+    "optional":  false,
+    "conditions":  {
+                       "clientAppTypes":  [
+                                              "mobileAppsAndDesktopClients"
+                                          ],
+                       "platforms":  {
+                                         "includePlatforms":  [
+                                                                  "windows"
+                                                              ]
+                                     },
+                       "devices":  {
+                                       "deviceFilter":  {
+                                                            "rule":  "(device.trustType -ne \"AzureAD\") and (device.trustType -ne \"ServerAD\")",
+                                                            "mode":  "include"
+                                                        }
+                                   },
+                       "applications":  {
+                                            "includeApplications":  [
+                                                                        "Office365"
+                                                                    ]
+                                        }
+                   },
+    "displayName":  "CA-MG-102 - Block Unmanaged Windows Devices for M365 Rich Client Access"
+}
+

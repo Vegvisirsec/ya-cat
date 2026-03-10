@@ -1,0 +1,39 @@
+{
+    "id":  "CA-BL-004",
+    "displayName":  "CA-BL-004 - Require MFA for Security Info Registration (Trusted Locations)",
+    "tier":  "baseline",
+    "target":  {
+                   "excludeGroupNames":  [
+                                             "CA-EXC-BL-004-SecurityInfoRegistration"
+                                         ]
+               },
+    "path":  "policies/baseline/CA-BL-004.require-mfa-for-security-info-registration.json",
+    "optional":  false,
+    "conditions":  {
+                       "clientAppTypes":  [
+                                              "all"
+                                          ],
+                       "users":  {
+                                     "includeUsers":  [
+                                                          "All"
+                                                      ]
+                                 },
+                       "applications":  {
+                                            "includeUserActions":  [
+                                                                       "urn:user:registersecurityinfo"
+                                                                   ]
+                                        },
+                       "locations":  {
+                                         "includeLocations":  [
+                                                                  "AllTrusted"
+                                                              ]
+                                     }
+                   },
+    "grantControls":  {
+                          "builtInControls":  [
+                                                  "mfa"
+                                              ],
+                          "operator":  "OR"
+                      }
+}
+

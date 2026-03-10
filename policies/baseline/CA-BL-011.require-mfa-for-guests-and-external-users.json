@@ -1,0 +1,34 @@
+{
+    "id":  "CA-BL-011",
+    "displayName":  "CA-BL-011 - Require MFA for Guests and External Users",
+    "tier":  "baseline",
+    "notes":  "Guest/external MVP policy. Enable when guest target model is confirmed.",
+    "target":  {
+
+               },
+    "conditions":  {
+                       "clientAppTypes":  [
+                                              "all"
+                                          ],
+                       "users":  {
+                                     "includeGuestsOrExternalUsers":  {
+                                                                          "guestOrExternalUserTypes":  "b2bCollaborationGuest,b2bCollaborationMember",
+                                                                          "externalTenants":  {
+                                                                                                  "membershipKind":  "all"
+                                                                                              }
+                                                                      }
+                                 },
+                       "applications":  {
+                                            "includeApplications":  [
+                                                                        "All"
+                                                                    ]
+                                        }
+                   },
+    "grantControls":  {
+                          "builtInControls":  [
+                                                  "mfa"
+                                              ],
+                          "operator":  "OR"
+                      }
+}
+

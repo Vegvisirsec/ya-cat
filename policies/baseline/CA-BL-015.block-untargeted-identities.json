@@ -1,0 +1,39 @@
+{
+    "id":  "CA-BL-015",
+    "displayName":  "CA-BL-015 - Block Untargeted Identities",
+    "tier":  "baseline",
+    "notes":  "Catch-all admission control policy. Report-only first. Intended to surface identities that are not placed into the toolkit targeting model.",
+    "target":  {
+                   "excludeGroupNames":  [
+                                             "CA-Tier-Baseline",
+                                             "CA-Tier-P1-Managed",
+                                             "CA-Tier-Frontline",
+                                             "CA-Tier-E5",
+                                             "CA-Pilot",
+                                             "CA-EXC-BL-015-UntargetedIdentityAdmission"
+                                         ]
+               },
+    "path":  "policies/baseline/CA-BL-015.block-untargeted-identities.json",
+    "optional":  false,
+    "conditions":  {
+                       "clientAppTypes":  [
+                                              "all"
+                                          ],
+                       "users":  {
+                                     "includeUsers":  [
+                                                          "All"
+                                                      ]
+                                 },
+                       "applications":  {
+                                            "includeApplications":  [
+                                                                        "All"
+                                                                    ]
+                                        }
+                   },
+    "grantControls":  {
+                          "builtInControls":  [
+                                                  "block"
+                                              ],
+                          "operator":  "OR"
+                      }
+}

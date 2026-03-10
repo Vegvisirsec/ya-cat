@@ -1,0 +1,40 @@
+{
+    "id":  "CA-BL-014",
+    "displayName":  "CA-BL-014 - Block Agent Identities",
+    "tier":  "baseline",
+    "notes":  "Preview-oriented discovery policy. Intended to run in report-only first to measure agent identity adoption before introducing an approval workflow.",
+    "path":  "policies/baseline/CA-BL-014.block-agent-identities.json",
+    "optional":  false,
+    "conditions":  {
+                       "clientAppTypes":  [
+                                              "all"
+                                          ],
+                       "users":  {
+                                     "includeUsers":  [
+                                                         "None"
+                                                      ]
+                                 },
+                       "clientApplications":  {
+                                                  "includeAgentIdServicePrincipals":  [
+                                                                                          "All"
+                                                                                      ],
+                                                  "excludeAgentIdServicePrincipals":  [
+
+                                                                                      ]
+                                              },
+                       "applications":  {
+                                            "includeApplications":  [
+                                                                        "All"
+                                                                    ],
+                                            "excludeApplications":  [
+
+                                                                    ]
+                                        }
+                   },
+    "grantControls":  {
+                          "builtInControls":  [
+                                                  "block"
+                                              ],
+                          "operator":  "OR"
+                      }
+}

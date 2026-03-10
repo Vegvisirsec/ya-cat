@@ -1,0 +1,37 @@
+[
+  {
+    "name": "CA-Tier-Baseline",
+    "description": "Dynamic baseline population: all member users.",
+    "membershipRule": "(user.userType -eq \"Member\")",
+    "membershipRuleProcessingState": "On",
+    "enforce": true
+  },
+  {
+    "name": "CA-Tier-P1-Managed",
+    "description": "Users with O365_w/o_Teams_Bundle_M5 license in this tenant.",
+    "membershipRule": "user.assignedPlans -any (assignedPlan.servicePlanId -eq \"5dbe027f-2339-4123-9542-606e4d348a72\" -and assignedPlan.capabilityStatus -eq \"Enabled\")",
+    "membershipRuleProcessingState": "On",
+    "enforce": true
+  },
+  {
+    "name": "CA-Tier-Frontline",
+    "description": "Users with Microsoft_Teams_EEA_New license in this tenant.",
+    "membershipRule": "user.assignedPlans -any (assignedPlan.servicePlanId -eq \"4a82b400-a79f-41a4-b4e2-e94f5787b113\" -and assignedPlan.capabilityStatus -eq \"Enabled\")",
+    "membershipRuleProcessingState": "On",
+    "enforce": true
+  },
+  {
+    "name": "CA-Tier-E5",
+    "description": "Users with O365_w/o_Teams_Bundle_M5 license (E5-equivalent in this tenant).",
+    "membershipRule": "user.assignedPlans -any (assignedPlan.servicePlanId -eq \"617b097b-4b93-4ede-83de-5f075bb5fb2f\" -and assignedPlan.capabilityStatus -eq \"Enabled\")",
+    "membershipRuleProcessingState": "On",
+    "enforce": true
+  },
+  {
+    "name": "CA-Pilot",
+    "description": "Dynamic pilot tier. Set a tenant-specific rule before enabling enforcement.",
+    "membershipRule": "(user.extensionAttribute2 -eq \"CA-PILOT\")",
+    "membershipRuleProcessingState": "On",
+    "enforce": true
+  }
+]

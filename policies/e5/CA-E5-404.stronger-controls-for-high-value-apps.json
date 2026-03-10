@@ -1,0 +1,40 @@
+{
+    "id":  "CA-E5-404",
+    "path":  "policies/e5/CA-E5-404.stronger-controls-for-high-value-apps.json",
+    "target":  {
+                   "includeGroupNames":  [
+                                             "CA-Tier-E5"
+                                         ]
+               },
+    "grantControls":  {
+                          "builtInControls":  [
+                                                  "block"
+                                              ],
+                          "operator":  "OR"
+                      },
+    "tier":  "e5",
+    "optional":  false,
+    "conditions":  {
+                       "clientAppTypes":  [
+                                              "all"
+                                          ],
+                       "platforms":  {
+                                         "includePlatforms":  [
+                                                                  "windows"
+                                                              ]
+                                     },
+                       "devices":  {
+                                       "deviceFilter":  {
+                                                            "rule":  "(device.trustType -ne \"AzureAD\") and (device.trustType -ne \"ServerAD\")",
+                                                            "mode":  "include"
+                                                        }
+                                   },
+                       "applications":  {
+                                            "includeApplications":  [
+                                                                        "Office365"
+                                                                    ]
+                                        }
+                   },
+    "displayName":  "CA-E5-404 - Block Unmanaged Windows Devices for High-Value Apps"
+}
+

@@ -1,0 +1,40 @@
+{
+    "id":  "CA-FL-202",
+    "path":  "policies/frontline/CA-FL-202.require-compliant-shared-device-for-frontline-access.json",
+    "target":  {
+                   "includeGroupNames":  [
+                                             "CA-Tier-Frontline"
+                                         ]
+               },
+    "grantControls":  {
+                          "builtInControls":  [
+                                                  "block"
+                                              ],
+                          "operator":  "OR"
+                      },
+    "tier":  "frontline",
+    "optional":  false,
+    "conditions":  {
+                       "clientAppTypes":  [
+                                              "all"
+                                          ],
+                       "platforms":  {
+                                         "includePlatforms":  [
+                                                                  "windows"
+                                                              ]
+                                     },
+                       "devices":  {
+                                       "deviceFilter":  {
+                                                            "rule":  "(device.trustType -ne \"AzureAD\") and (device.trustType -ne \"ServerAD\")",
+                                                            "mode":  "include"
+                                                        }
+                                   },
+                       "applications":  {
+                                            "includeApplications":  [
+                                                                        "All"
+                                                                    ]
+                                        }
+                   },
+    "displayName":  "CA-FL-202 - Block Unmanaged Windows Devices for Frontline Access"
+}
+

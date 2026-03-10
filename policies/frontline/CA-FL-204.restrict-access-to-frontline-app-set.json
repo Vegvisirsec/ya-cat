@@ -1,0 +1,29 @@
+{
+    "id":  "CA-FL-204",
+    "path":  "policies/frontline/CA-FL-204.restrict-access-to-frontline-app-set.json",
+    "target":  {
+                   "includeGroupNames":  [
+                                             "CA-Tier-Frontline"
+                                         ]
+               },
+    "grantControls":  {
+                          "builtInControls":  [
+                                                  "mfa"
+                                              ],
+                          "operator":  "OR"
+                      },
+    "tier":  "frontline",
+    "optional":  false,
+    "conditions":  {
+                       "applications":  {
+                                            "includeApplications":  [
+                                                                        "Office365"
+                                                                    ]
+                                        },
+                       "clientAppTypes":  [
+                                              "all"
+                                          ]
+                   },
+    "displayName":  "CA-FL-204 - Restrict Access to Frontline App Set"
+}
+

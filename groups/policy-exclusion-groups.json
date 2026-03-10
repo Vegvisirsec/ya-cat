@@ -1,0 +1,57 @@
+[
+  {
+    "name": "CA-EXC-BL-002-Admin-PhishResistantMFA",
+    "description": "Exception group for CA-BL-002 Require Phishing-Resistant MFA for Admins. Use only for short-lived operational exception handling.",
+    "policyId": "CA-BL-002"
+  },
+  {
+    "name": "CA-EXC-BL-003-User-MFAorManagedSignal",
+    "description": "Exception group for CA-BL-003 Require MFA or Managed Device Signal for Users. Use for temporary user impact mitigation only.",
+    "policyId": "CA-BL-003"
+  },
+  {
+    "name": "CA-EXC-BL-004-SecurityInfoRegistration",
+    "description": "Exception group for CA-BL-004 security info registration policy. Use only while resolving registration/location edge cases.",
+    "policyId": "CA-BL-004"
+  },
+  {
+    "name": "CA-EXC-BL-005-DeviceCodeFlow",
+    "description": "Exception group for CA-BL-005 block device code flow policy. Use only for known incompatible legacy workflows.",
+    "policyId": "CA-BL-005"
+  },
+  {
+    "name": "CA-EXC-BL-006-AuthenticationTransfer",
+    "description": "Exception group for CA-BL-006 block authentication transfer policy. Use for limited, approved compatibility exceptions.",
+    "policyId": "CA-BL-006"
+  },
+  {
+    "name": "CA-EXC-MG-101-UnmanagedWinBrowser",
+    "description": "Exception group for CA-MG-101 unmanaged Windows browser block. Use for temporary managed-device onboarding exceptions.",
+    "policyId": "CA-MG-101"
+  },
+  {
+    "name": "CA-EXC-MG-102-UnmanagedWinRichClient",
+    "description": "Exception group for CA-MG-102 unmanaged Windows rich client block. Use for short-term transition exceptions.",
+    "policyId": "CA-MG-102"
+  },
+  {
+    "name": "CA-EXC-MG-104-UnmanagedWinAdmin",
+    "description": "Exception group for CA-MG-104 unmanaged Windows admin workstation block. Requires explicit security approval.",
+    "policyId": "CA-MG-104"
+  },
+  {
+    "name": "CA-EXC-E5-403-UnmanagedWinPrivileged",
+    "description": "Exception group for CA-E5-403 unmanaged Windows privileged workstation block. Requires break-glass level approval.",
+    "policyId": "CA-E5-403"
+  },
+  {
+    "name": "CA-EXC-FL-205-UnmanagedWinFrontlineAdmin",
+    "description": "Exception group for CA-FL-205 unmanaged Windows frontline admin block. Use only for urgent operational continuity.",
+    "policyId": "CA-FL-205"
+  },
+  {
+    "name": "CA-EXC-BL-015-UntargetedIdentityAdmission",
+    "description": "Exception group for CA-BL-015 untargeted identity admission control. Use only for short-lived onboarding or group-placement gaps.",
+    "policyId": "CA-BL-015"
+  }
+]

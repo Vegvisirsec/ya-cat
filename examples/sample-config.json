@@ -1,0 +1,5 @@
+{
+  "tenantMode": "nonProduction",
+  "defaultPolicyState": "reportOnly",
+  "tiers": ["baseline", "managed", "frontline", "e5"]
+}

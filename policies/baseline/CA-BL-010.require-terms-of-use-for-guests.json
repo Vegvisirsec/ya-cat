@@ -1,0 +1,35 @@
+{
+    "id":  "CA-BL-010",
+    "path":  "policies/baseline/CA-BL-010.require-terms-of-use-for-guests.json",
+    "notes":  "Requires Terms of Use ID before deployment.",
+    "target":  {
+
+               },
+    "grantControls":  {
+                          "operator":  "OR",
+                          "termsOfUse":  [
+                                             "{{TERMS_OF_USE_ID}}"
+                                         ]
+                      },
+    "tier":  "baseline",
+    "conditions":  {
+                       "clientAppTypes":  [
+                                              "all"
+                                          ],
+                       "users":  {
+                                     "includeGuestsOrExternalUsers":  {
+                                                                          "guestOrExternalUserTypes":  "b2bCollaborationGuest,b2bCollaborationMember",
+                                                                          "externalTenants":  {
+                                                                                                  "membershipKind":  "all"
+                                                                                              }
+                                                                      }
+                                 },
+                       "applications":  {
+                                            "includeApplications":  [
+                                                                        "All"
+                                                                    ]
+                                        }
+                   },
+    "displayName":  "CA-BL-010 - Require Terms of Use for Guests"
+}
+
