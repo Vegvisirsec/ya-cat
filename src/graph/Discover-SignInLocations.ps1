@@ -49,12 +49,13 @@ function Invoke-Graph {
         Method      = $Method
         Uri         = $Uri
         Headers     = $Headers
-        ContentType = 'application/json'
+        AuthContext = $script:authContext
+        JsonDepth   = 10
       }
-      if ($Body) {
-        $params['Body'] = $Body | ConvertTo-Json -Depth 10
+      if ($null -ne $Body) {
+        $params['Body'] = $Body
       }
-      return Invoke-RestMethod @params
+      return Invoke-GraphRequest @params
     }
     catch {
       $errMsg = $_.Exception.Message
@@ -210,14 +211,7 @@ function Create-NamedLocation {
 "@
     
     Write-Host "Sending payload: $jsonPayload" -ForegroundColor Gray
-    $params = @{
-      Method      = 'POST'
-      Uri         = $uri
-      Headers     = $Headers
-      ContentType = 'application/json'
-      Body        = $jsonPayload
-    }
-    $result = Invoke-RestMethod @params
+    $result = Invoke-GraphRequest -Method POST -Uri $uri -Headers $Headers -Body $jsonPayload -AuthContext $script:authContext
     $resultId = $result.id
     Write-Host "Named location created successfully (ID: $resultId)" -ForegroundColor Green
     return $result
@@ -238,9 +232,8 @@ function Create-NamedLocation {
 # Main execution
 try {
   Load-EnvFile -Path $EnvFile
-  $tenantId = Get-RequiredEnv -Name 'TENANT_ID'
-  $clientId = Get-RequiredEnv -Name 'CLIENT_ID'
-  $clientSecret = Get-RequiredEnv -Name 'CLIENT_SECRET'
+  $authContext = Get-GraphAuthContextFromEnv
+  $tenantId = $authContext.TenantId
   
   if ([string]::IsNullOrWhiteSpace($OutputFolder)) {
     $ts = Get-Date -Format 'yyyyMMdd-HHmmss'
@@ -255,8 +248,9 @@ try {
   Write-Host "Output folder: $OutputFolder`n"
   
   # Authenticate
-  $token = Get-GraphToken -TenantId $tenantId -ClientId $clientId -ClientSecret $clientSecret
-  $headers = @{ Authorization = "Bearer $token" }
+  $token = Get-GraphTokenFromEnv
+  Write-Host "Auth method: $($authContext.AuthMethod)" -ForegroundColor Cyan
+  $headers = if ($authContext.AuthMethod -eq 'Delegated') { @{} } else { @{ Authorization = "Bearer $token" } }
 
   # Compute a usable default named location name if none is provided
   $tenantDisplayName = Get-TenantDisplayName -Headers $headers

@@ -28,8 +28,6 @@ Use a non-production test tenant for build validation.
 - idempotent re-apply behavior
 - export and comparison behavior
 - exclusion preservation
-- context-package completeness checks
-- findings schema validation for local advisory outputs
 
 ## Required rollout checks
 

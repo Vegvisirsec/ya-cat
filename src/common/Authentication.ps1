@@ -103,6 +103,237 @@ function Get-GraphTokenFromAuth {
   }
 }
 
+function Get-OptionalEnvironmentValue {
+  param([string]$Name)
+
+  $value = [Environment]::GetEnvironmentVariable($Name, 'Process')
+  if ([string]::IsNullOrWhiteSpace($value)) {
+    return $null
+  }
+
+  return $value
+}
+
+function Get-RequiredEnvironmentValue {
+  param([string]$Name)
+
+  $value = Get-OptionalEnvironmentValue -Name $Name
+  if ([string]::IsNullOrWhiteSpace($value)) {
+    throw "Missing required env var: $Name"
+  }
+
+  return $value
+}
+
+function Get-GraphAuthContextFromEnv {
+  [CmdletBinding()]
+  param(
+    [string]$DefaultAuthMethod = 'ClientSecret',
+    [string]$DefaultScope = 'https://graph.microsoft.com/.default'
+  )
+
+  $tenantId = Get-RequiredEnvironmentValue -Name 'TENANT_ID'
+  $clientId = Get-RequiredEnvironmentValue -Name 'CLIENT_ID'
+
+  $authMethod = Get-OptionalEnvironmentValue -Name 'AUTH_METHOD'
+  if ([string]::IsNullOrWhiteSpace($authMethod)) {
+    $authMethod = $DefaultAuthMethod
+  }
+
+  if ($authMethod -notin @('ClientSecret', 'ClientCertificate', 'Delegated')) {
+    throw "Invalid AUTH_METHOD '$authMethod'. Expected one of: ClientSecret, ClientCertificate, Delegated"
+  }
+
+  $scope = Get-OptionalEnvironmentValue -Name 'GRAPH_SCOPE'
+  if ([string]::IsNullOrWhiteSpace($scope)) {
+    $scope = $DefaultScope
+  }
+
+  $context = [ordered]@{
+    AuthMethod = $authMethod
+    TenantId   = $tenantId
+    ClientId   = $clientId
+    Scope      = $scope
+  }
+
+  switch ($authMethod) {
+    'ClientSecret' {
+      $context.ClientSecret = Get-RequiredEnvironmentValue -Name 'CLIENT_SECRET'
+    }
+    'ClientCertificate' {
+      $certificatePath = Get-OptionalEnvironmentValue -Name 'CERTIFICATE_PATH'
+      $certificateThumbprint = Get-OptionalEnvironmentValue -Name 'CERTIFICATE_THUMBPRINT'
+      $certificatePassword = Get-OptionalEnvironmentValue -Name 'CERTIFICATE_PASSWORD'
+
+      if ([string]::IsNullOrWhiteSpace($certificatePath) -and [string]::IsNullOrWhiteSpace($certificateThumbprint)) {
+        throw "ClientCertificate authentication requires CERTIFICATE_PATH or CERTIFICATE_THUMBPRINT"
+      }
+
+      if (-not [string]::IsNullOrWhiteSpace($certificatePath)) {
+        $context.CertificatePath = $certificatePath
+      }
+      if (-not [string]::IsNullOrWhiteSpace($certificateThumbprint)) {
+        $context.CertificateThumbprint = $certificateThumbprint
+      }
+      if (-not [string]::IsNullOrWhiteSpace($certificatePassword)) {
+        $context.CertificatePassword = ConvertTo-SecureString -String $certificatePassword -AsPlainText -Force
+      }
+    }
+    'Delegated' {
+      $delegatedScopes = @()
+      if (-not [string]::IsNullOrWhiteSpace($scope) -and $scope -ne 'https://graph.microsoft.com/.default') {
+        $delegatedScopes = @($scope -split '[,\s]+' | Where-Object { -not [string]::IsNullOrWhiteSpace($_) })
+      }
+      if ($delegatedScopes.Count -eq 0) {
+        $delegatedScopes = @(
+          'Policy.Read.All',
+          'Policy.ReadWrite.ConditionalAccess',
+          'AuditLog.Read.All',
+          'Directory.Read.All',
+          'Group.ReadWrite.All',
+          'Application.Read.All'
+        )
+      }
+
+      $context.DelegatedScopes = @($delegatedScopes)
+    }
+  }
+
+  return [pscustomobject]$context
+}
+
+function Get-GraphTokenFromEnv {
+  [CmdletBinding()]
+  param(
+    [string]$DefaultAuthMethod = 'ClientSecret',
+    [string]$DefaultScope = 'https://graph.microsoft.com/.default'
+  )
+
+  $context = Get-GraphAuthContextFromEnv -DefaultAuthMethod $DefaultAuthMethod -DefaultScope $DefaultScope
+  $params = @{
+    AuthMethod = $context.AuthMethod
+    TenantId   = $context.TenantId
+    ClientId   = $context.ClientId
+    Scope      = $context.Scope
+  }
+
+  if ($context.PSObject.Properties.Name -contains 'ClientSecret') {
+    $params.ClientSecret = $context.ClientSecret
+  }
+  if ($context.PSObject.Properties.Name -contains 'CertificatePath') {
+    $params.CertificatePath = $context.CertificatePath
+  }
+  if ($context.PSObject.Properties.Name -contains 'CertificateThumbprint') {
+    $params.CertificateThumbprint = $context.CertificateThumbprint
+  }
+  if ($context.PSObject.Properties.Name -contains 'CertificatePassword') {
+    $params.CertificatePassword = $context.CertificatePassword
+  }
+
+  return Get-GraphTokenFromAuth @params
+}
+
+function Connect-GraphDelegatedSession {
+  [CmdletBinding()]
+  param(
+    [Parameter(Mandatory = $true)]
+    [pscustomobject]$AuthContext
+  )
+
+  if ($AuthContext.AuthMethod -ne 'Delegated') {
+    throw "Connect-GraphDelegatedSession only supports Delegated auth contexts"
+  }
+
+  if (-not (Get-Module -ListAvailable -Name Microsoft.Graph.Authentication)) {
+    Write-Error "Microsoft.Graph.Authentication module is required for delegated authentication. Install with: Install-Module Microsoft.Graph.Authentication -Scope CurrentUser"
+    throw "Microsoft.Graph.Authentication module not found"
+  }
+
+  Import-Module Microsoft.Graph.Authentication -ErrorAction Stop
+
+  $existingContext = Get-MgContext -ErrorAction SilentlyContinue
+  $requiredScopes = @($AuthContext.DelegatedScopes)
+  $needsConnect = $true
+
+  if ($null -ne $existingContext -and $existingContext.AuthType -eq 'Delegated') {
+    $existingScopes = @()
+    if ($existingContext.Scopes) {
+      $existingScopes = @($existingContext.Scopes)
+    }
+
+    $scopeMissing = $false
+    foreach ($scope in $requiredScopes) {
+      if ($existingScopes -notcontains $scope) {
+        $scopeMissing = $true
+        break
+      }
+    }
+
+    if (($existingContext.TenantId -eq $AuthContext.TenantId) -and ($existingContext.ClientId -eq $AuthContext.ClientId) -and -not $scopeMissing) {
+      $needsConnect = $false
+    }
+  }
+
+  if ($needsConnect) {
+    Connect-MgGraph -ClientId $AuthContext.ClientId -TenantId $AuthContext.TenantId -Scopes $requiredScopes -ErrorAction Stop | Out-Null
+  }
+
+  return Get-MgContext -ErrorAction Stop
+}
+
+function Invoke-GraphRequest {
+  [CmdletBinding()]
+  param(
+    [Parameter(Mandatory = $true)]
+    [ValidateSet('GET','POST','PATCH','DELETE')]
+    [string]$Method,
+
+    [Parameter(Mandatory = $true)]
+    [string]$Uri,
+
+    [Parameter(Mandatory = $true)]
+    [pscustomobject]$AuthContext,
+
+    [hashtable]$Headers,
+
+    $Body,
+
+    [int]$JsonDepth = 50
+  )
+
+  if ($AuthContext.AuthMethod -eq 'Delegated') {
+    Connect-GraphDelegatedSession -AuthContext $AuthContext | Out-Null
+
+    $params = @{
+      Method     = $Method
+      Uri        = $Uri
+      OutputType = 'PSObject'
+    }
+
+    if ($Headers -and $Headers.Keys.Count -gt 0) {
+      $params.Headers = $Headers
+    }
+
+    if ($null -ne $Body) {
+      if ($Body -is [string]) {
+        $params.Body = $Body
+      }
+      else {
+        $params.Body = $Body | ConvertTo-Json -Depth $JsonDepth
+      }
+    }
+
+    return Invoke-MgGraphRequest @params
+  }
+
+  if ($null -eq $Body) {
+    return Invoke-RestMethod -Method $Method -Uri $Uri -Headers $Headers -ContentType 'application/json'
+  }
+
+  $jsonBody = $Body | ConvertTo-Json -Depth $JsonDepth
+  return Invoke-RestMethod -Method $Method -Uri $Uri -Headers $Headers -ContentType 'application/json' -Body $jsonBody
+}
+
 <#
 .FUNCTION Get-GraphTokenClientSecret
 .SYNOPSIS
@@ -261,9 +492,9 @@ function Get-GraphTokenClientCertificate {
   Acquire token using delegated flow (interactive user sign-in).
 
 .NOTES
-  - Requires MSAL.PS module
-  - Launches browser for interactive authentication
-  - Token includes user context; useful for audit/compliance scenarios
+  - Requires Microsoft.Graph.Authentication module
+  - Launches browser-backed Connect-MgGraph authentication
+  - User context is used for subsequent Graph requests in the session
   - Not suitable for unattended automation
 #>
 function Get-GraphTokenDelegated {
@@ -277,30 +508,29 @@ function Get-GraphTokenDelegated {
     throw "ClientId required for Delegated authentication"
   }
 
-  # Check for MSAL.PS module
-  if (-not (Get-Module -ListAvailable -Name MSAL.PS)) {
-    Write-Error "MSAL.PS module is required for delegated authentication. Install with: Install-Module MSAL.PS"
-    throw "MSAL.PS module not found"
-  }
-
   try {
-    Import-Module MSAL.PS -ErrorAction Stop
-
-    $msalParams = @{
-      ClientId    = $ClientId
-      TenantId    = $TenantId
-      Scopes      = @($Scope)
-      Interactive = $true
+    $authContext = [pscustomobject]@{
+      AuthMethod      = 'Delegated'
+      TenantId        = $TenantId
+      ClientId        = $ClientId
+      DelegatedScopes = if (-not [string]::IsNullOrWhiteSpace($Scope) -and $Scope -ne 'https://graph.microsoft.com/.default') {
+        @($Scope -split '[,\s]+' | Where-Object { -not [string]::IsNullOrWhiteSpace($_) })
+      }
+      else {
+        @(
+          'Policy.Read.All',
+          'Policy.ReadWrite.ConditionalAccess',
+          'AuditLog.Read.All',
+          'Directory.Read.All',
+          'Group.ReadWrite.All',
+          'Application.Read.All'
+        )
+      }
     }
 
-    $authResult = Get-MsalToken @msalParams
-
-    if (-not $authResult.AccessToken) {
-      throw "MSAL authentication failed or was cancelled"
-    }
-
-    Write-Verbose "Token acquired via delegated flow for user: $($authResult.ClaimsPrincipal.FindFirst('preferred_username').Value)"
-    return $authResult.AccessToken
+    $context = Connect-GraphDelegatedSession -AuthContext $authContext
+    Write-Verbose "Graph delegated session established for user: $($context.Account)"
+    return $null
   }
   catch {
     Write-Error "Failed to acquire token via Delegated flow: $($_.Exception.Message)"

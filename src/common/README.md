@@ -35,15 +35,17 @@ $token = Get-GraphTokenFromAuth `
   -CertificateThumbprint 'abcd1234...'
 ```
 
-**Using delegated flow (interactive):**
+**Using delegated flow (interactive, via Microsoft Graph PowerShell):**
 ```powershell
-$token = Get-GraphTokenFromAuth `
-  -AuthMethod Delegated `
-  -TenantId 'your-tenant-id' `
-  -ClientId 'your-app-client-id'
+Connect-GraphDelegatedSession -AuthContext ([pscustomobject]@{
+  AuthMethod = 'Delegated'
+  TenantId = 'your-tenant-id'
+  ClientId = 'your-app-client-id'
+  DelegatedScopes = @('Policy.Read.All')
+})
 ```
 
-This launches a browser for interactive sign-in and includes your user context in the token.
+This launches a browser-backed `Connect-MgGraph` sign-in and uses your user context for subsequent Graph requests.
 
 ### Environment variables
 
@@ -52,7 +54,27 @@ Scripts automatically load from `.env.local`:
 ```
 TENANT_ID=your-tenant-id
 CLIENT_ID=your-app-client-id
+AUTH_METHOD=ClientSecret
 CLIENT_SECRET=your-secret
+GRAPH_SCOPE=https://graph.microsoft.com/.default
+```
+
+Certificate example:
+
+```
+TENANT_ID=your-tenant-id
+CLIENT_ID=your-app-client-id
+AUTH_METHOD=ClientCertificate
+CERTIFICATE_THUMBPRINT=abcd1234...
+GRAPH_SCOPE=https://graph.microsoft.com/.default
+```
+
+Delegated example:
+
+```
+TENANT_ID=your-tenant-id
+CLIENT_ID=your-app-client-id
+AUTH_METHOD=Delegated
 GRAPH_SCOPE=https://graph.microsoft.com/.default
 ```
 
@@ -81,7 +103,7 @@ GRAPH_SCOPE=https://graph.microsoft.com/.default
 
 **For Delegated flow:**
 - App registration with `Policy.ReadWrite.ConditionalAccess` delegated permission
-- MSAL.PS module: `Install-Module MSAL.PS -Force`
+- Microsoft Graph auth module: `Install-Module Microsoft.Graph.Authentication -Scope CurrentUser`
 - Interactive sign-in capability
 
 ### Function reference
@@ -101,7 +123,7 @@ Get-GraphTokenFromAuth -AuthMethod <method> [parameters...]
 - `-CertificatePath`: Path to `.pfx` or `.cer` (optional for ClientCertificate)
 - `-CertificateThumbprint`: Cert store thumbprint (optional for ClientCertificate)
 - `-CertificatePassword`: Password as SecureString (optional for ClientCertificate)
-- `-Scope`: Graph scope (default: `https://graph.microsoft.com/.default`)
+- `-Scope`: Graph scope (default: `https://graph.microsoft.com/.default`); delegated auth can also use a comma- or space-separated scope list
 
 #### Get-GraphToken (legacy)
 Backward-compatibility wrapper using client secret.
@@ -112,13 +134,9 @@ Get-GraphToken -TenantId $id -ClientId $cid -ClientSecret $secret -Scope $scope
 
 ### Integration in scripts
 
-All deploy, evaluate, and graph utility scripts source `Authentication.ps1` and use `Get-GraphToken`. To support other auth methods, update `.env.local` or pass parameters to the scripts directly.
+All deploy, evaluate, and graph utility scripts source `Authentication.ps1` and now resolve auth from `.env.local` through `Get-GraphAuthContextFromEnv` / `Get-GraphTokenFromEnv`.
 
-Example for scripts that accept auth customization:
-```bash
-# Future: certificate-based deployment
-./Deploy-CAPolicies.ps1 -AuthMethod ClientCertificate -CertThumbprint abc123
-```
+Set `AUTH_METHOD=ClientSecret`, `ClientCertificate`, or `Delegated` and provide the matching environment variables.
 
 ### Troubleshooting
 
@@ -131,8 +149,8 @@ Example for scripts that accept auth customization:
 - Copy exact thumbprint (no spaces)
 - Use `-CertificatePath` if cert is in a file instead
 
-**MSAL.PS module not found**
-- Install: `Install-Module MSAL.PS -Force -Scope CurrentUser`
+**Microsoft.Graph.Authentication module not found**
+- Install: `Install-Module Microsoft.Graph.Authentication -Force -Scope CurrentUser`
 - Required only for delegated flow
 
 ### Future enhancements

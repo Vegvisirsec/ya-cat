@@ -177,7 +177,7 @@ VS Code users can enable JSON Schema validation:
   "json.schemas": [
     {
       "fileMatch": ["policies/**/*.json"],
-      "url": "file:///path/to/policies/schema/policy-schema.json"
+      "url": "./policies/schema/policy-schema.json"
     }
   ]
 }

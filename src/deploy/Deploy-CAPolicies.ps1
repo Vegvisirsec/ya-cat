@@ -152,12 +152,7 @@ function Invoke-Graph {
   $maxRetries = 5
   for ($attempt = 0; $attempt -le $maxRetries; $attempt++) {
     try {
-      if ($null -eq $Body) {
-        return Invoke-RestMethod -Method $Method -Uri $Uri -Headers $Headers -ContentType 'application/json'
-      }
-
-      $jsonBody = $Body | ConvertTo-Json -Depth 30
-      return Invoke-RestMethod -Method $Method -Uri $Uri -Headers $Headers -ContentType 'application/json' -Body $jsonBody
+      return Invoke-GraphRequest -Method $Method -Uri $Uri -Headers $Headers -Body $Body -AuthContext $script:authContext -JsonDepth 30
     } catch {
       $msg = $_.Exception.Message
       $statusCode = $null
@@ -900,13 +895,11 @@ Write-RunLog -Level INFO -Message "Starting run. mode=$Mode envFile=$EnvFile wha
 
 Load-EnvFile -Path $EnvFile
 
-$tenantId = Get-RequiredEnv -Name 'TENANT_ID'
-$clientId = Get-RequiredEnv -Name 'CLIENT_ID'
-$clientSecret = Get-RequiredEnv -Name 'CLIENT_SECRET'
-$scope = Get-RequiredEnv -Name 'GRAPH_SCOPE'
-
-$token = Get-GraphToken -TenantId $tenantId -ClientId $clientId -ClientSecret $clientSecret -Scope $scope
-$headers = @{ Authorization = "Bearer $token" }
+$authContext = Get-GraphAuthContextFromEnv
+$tenantId = $authContext.TenantId
+$token = Get-GraphTokenFromEnv
+Write-RunLog -Level INFO -Message "Authenticated to Graph using method=$($authContext.AuthMethod)"
+$headers = if ($authContext.AuthMethod -eq 'Delegated') { @{} } else { @{ Authorization = "Bearer $token" } }
 
 $groupNames = @(
   'CA-BreakGlass-Exclude',

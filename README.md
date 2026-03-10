@@ -2,8 +2,15 @@
 
 ```text
  /\_/\\
-( o.o )  ya-cat
+( o.o )
  > ^ <
+
+                 _____         _
+ _   _  __ _    |  ___| __ _  | |_
+| | | |/ _` |   | |    / _` | | __|
+| |_| | (_| |   | |___| (_| | | |_
+ \__, |\__,_|   |_____|\__,_|  \__|
+ |___/
 ```
 
 Portable Conditional Access policy definitions, deployment helpers, export utilities, and reviewer guidance for Microsoft 365 environments.
@@ -19,27 +26,28 @@ Core things this repo is for:
 
 ## Design approach
 
-This toolkit loosely follows a persona-based Conditional Access design approach, but it is not a pure persona model. The policy tiers reflect both user shape and license capability: baseline and managed controls can be thought of as sub-personas of the "typical user", while frontline and E5 extend that model for materially different operating patterns or higher-capability license estates.
+This toolkit loosely follows a persona-based Conditional Access design approach, but it is not a pure persona model. The policy tiers reflect both user type (persona) and license capability: baseline can be thought of as the stuff, that should be deployed to every tenant. Managed controls can be thought of as the policies that you should deploy, if you have devices mostly managed by Intune. While frontline and E5 can be considered as sub-personas of the "typical user", with different operating "patterns" or higher-capability license availability. 
 
 ## What this repo includes
 
 - policy JSON for baseline, managed, frontline, and E5 tiers
-- PowerShell scripts for deploy, evaluate, export, and context-package generation
+- PowerShell scripts for deploy, evaluate, export, and supporting Graph utilities
 - target-group and exclusion-group reference material
 - per-policy reviewer instructions for structured assessment work
-- local evaluation inputs for offline LLM or human review
+- reviewer-oriented documentation for structured assessment work
 
-## Local LLM use
+## Supported
 
-The repository includes reusable evaluation instructions and context-package exports intended for use with a local LLM or human reviewer.
-
-That prompt content exists in the repo today, but the repo does not yet include an LLM execution engine or end-to-end runner that performs the evaluation automatically.
+- Authentication methods: `ClientSecret`, `ClientCertificate`, and `Delegated` interactive sign-in
+- Main script coverage: deploy, deploy-from-folder, export, and Graph utility scripts all resolve auth from `.env.local`
+- Default auth mode: `ClientSecret` if `AUTH_METHOD` is not set
+- Environment-based configuration: set `AUTH_METHOD` plus the matching credential values in `.env.local`
 
 ## Safety defaults
 
 - new toolkit-managed policies deploy as `reportOnly`
 - break-glass exclusions are delivered through group membership, but must be manually maintained in the target tenant
-- deployment should be validated in a non-production tenant first!
+- Any deployment should be validated in a non-production tenant first!
 
 ## Intentional placeholders
 
@@ -48,12 +56,22 @@ Two policy templates intentionally retain tenant-specific deployment placeholder
 - `policies/baseline/CA-BL-009.block-non-business-countries.json` requires `{{BUSINESS_COUNTRIES_LOCATION_ID}}`
 - `policies/baseline/CA-BL-010.require-terms-of-use-for-guests.json` requires `{{TERMS_OF_USE_ID}}`
 
+For `CA-BL-010`, there is a barebones starter document at `examples/sample-terms-of-use.md`. Export it to PDF, create the Terms of use object in the portal, then use that object ID for `{{TERMS_OF_USE_ID}}`.
+
+Short portal path:
+
+1. Microsoft Entra admin center
+2. `Entra ID` > `Conditional Access` > `Terms of use`
+3. `New terms`
+4. Upload the PDF, set the name/display name, create it
+5. Copy the Terms of use object ID into `CA-BL-010`
+
 ## Core paths
 
 - `policies/` policy definitions and schema
 - `groups/` target group and exclusion group model
 - `src/deploy/` deployment entry points
-- `src/evaluate/` export and context-package utilities
+- `src/evaluate/` export utilities
 - `src/graph/` supporting Graph utilities
 - `docs/` architecture, catalog, and reviewer guidance
 - `examples/` sample config and data files
@@ -72,17 +90,66 @@ Export tenant Conditional Access policies:
 powershell -NoProfile -ExecutionPolicy Bypass -File src/evaluate/Export-CAPolicies.ps1 -EnvFile .env.local
 ```
 
-Export a local evaluation context package:
+## Authentication examples
+
+Client secret with export:
+
+```dotenv
+TENANT_ID=<your-tenant-id>
+CLIENT_ID=<your-app-client-id>
+AUTH_METHOD=ClientSecret
+CLIENT_SECRET=<your-app-client-secret>
+GRAPH_SCOPE=https://graph.microsoft.com/.default
+```
 
 ```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File src/evaluate/Export-CAContextPackage.ps1 -EnvFile .env.local -DaysPast 30
+powershell -NoProfile -ExecutionPolicy Bypass -File src/evaluate/Export-CAPolicies.ps1 -EnvFile .env.local
 ```
+
+Client certificate with export:
+
+```dotenv
+TENANT_ID=<your-tenant-id>
+CLIENT_ID=<your-app-client-id>
+AUTH_METHOD=ClientCertificate
+CERTIFICATE_THUMBPRINT=<your-cert-thumbprint>
+GRAPH_SCOPE=https://graph.microsoft.com/.default
+```
+
+Or use a certificate file:
+
+```dotenv
+TENANT_ID=<your-tenant-id>
+CLIENT_ID=<your-app-client-id>
+AUTH_METHOD=ClientCertificate
+CERTIFICATE_PATH=C:\path\to\graph-auth.pfx
+CERTIFICATE_PASSWORD=<optional-pfx-password>
+GRAPH_SCOPE=https://graph.microsoft.com/.default
+```
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File src/evaluate/Export-CAPolicies.ps1 -EnvFile .env.local
+```
+
+Delegated interactive sign-in with export:
+
+```dotenv
+TENANT_ID=<your-tenant-id>
+CLIENT_ID=<your-app-client-id>
+AUTH_METHOD=Delegated
+GRAPH_SCOPE=https://graph.microsoft.com/.default
+```
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File src/evaluate/Export-CAPolicies.ps1 -EnvFile .env.local
+```
+
+Delegated auth requires the `Microsoft.Graph.Authentication` PowerShell module and will open an interactive `Connect-MgGraph` sign-in flow.
 
 ## Documentation 
 
 - `docs/architecture.md`
 - `docs/policy-catalog.md`
-- `docs/context-package.md`
 - `docs/policy-evaluation/README.md`
 - `groups/target-groups.md`
 

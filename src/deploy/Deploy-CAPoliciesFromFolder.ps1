@@ -109,12 +109,7 @@ function Invoke-Graph {
     $Body
   )
 
-  if ($null -eq $Body) {
-    return Invoke-RestMethod -Method $Method -Uri $Uri -Headers $Headers -ContentType 'application/json'
-  }
-
-  $jsonBody = $Body | ConvertTo-Json -Depth 50
-  return Invoke-RestMethod -Method $Method -Uri $Uri -Headers $Headers -ContentType 'application/json' -Body $jsonBody
+  return Invoke-GraphRequest -Method $Method -Uri $Uri -Headers $Headers -Body $Body -AuthContext $script:authContext -JsonDepth 50
 }
 
 function Escape-ODataString {
@@ -156,17 +151,15 @@ Initialize-RunLog -Path $LogPath
 Write-RunLog -Level INFO -Message "Starting folder deploy. inputFolder=$InputFolder whatIf=$($WhatIf.IsPresent) preserveState=$($PreserveState.IsPresent) continueOnError=$($ContinueOnError.IsPresent)"
 
 Load-EnvFile -Path $EnvFile
-$tenantId = Get-RequiredEnv -Name 'TENANT_ID'
-$clientId = Get-RequiredEnv -Name 'CLIENT_ID'
-$clientSecret = Get-RequiredEnv -Name 'CLIENT_SECRET'
-$scope = Get-RequiredEnv -Name 'GRAPH_SCOPE'
+$authContext = Get-GraphAuthContextFromEnv
 
 if (-not (Test-Path $InputFolder)) { throw "Input folder not found: $InputFolder" }
 $files = Get-ChildItem -Path $InputFolder -File -Filter '*.json' | Sort-Object Name
 if ($files.Count -eq 0) { throw "No .json files found in: $InputFolder" }
 
-$token = Get-GraphToken -TenantId $tenantId -ClientId $clientId -ClientSecret $clientSecret -Scope $scope
-$headers = @{ Authorization = "Bearer $token" }
+$token = Get-GraphTokenFromEnv
+Write-RunLog -Level INFO -Message "Authenticated to Graph using method=$($authContext.AuthMethod)"
+$headers = if ($authContext.AuthMethod -eq 'Delegated') { @{} } else { @{ Authorization = "Bearer $token" } }
 
 $rows = @()
 $created = 0

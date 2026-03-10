@@ -54,12 +54,13 @@ function Invoke-GraphAPI {
         Method      = $Method
         Uri         = $Uri
         Headers     = $Headers
-        ContentType = 'application/json'
+        AuthContext = $script:authContext
+        JsonDepth   = 10
       }
-      if ($Body) {
-        $params['Body'] = $Body | ConvertTo-Json -Depth 10
+      if ($null -ne $Body) {
+        $params['Body'] = $Body
       }
-      return Invoke-RestMethod @params
+      return Invoke-GraphRequest @params
     }
     catch {
       $statusCode = $_.Exception.Response.StatusCode.Value__
@@ -264,20 +265,21 @@ try {
   Write-Host "Loading environment..." -ForegroundColor Cyan
   Load-EnvFile -Path $EnvFile
   
-  $tenantId = Get-RequiredEnv 'TENANT_ID'
-  $clientId = Get-RequiredEnv 'CLIENT_ID'
-  $clientSecret = Get-RequiredEnv 'CLIENT_SECRET'
+  $authContext = Get-GraphAuthContextFromEnv
   
   if ([string]::IsNullOrWhiteSpace($OutputFolder)) {
     $OutputFolder = 'output'
   }
   
   Write-Host "Authenticating..." -ForegroundColor Cyan
-  $token = Get-GraphToken -TenantId $tenantId -ClientId $clientId -ClientSecret $clientSecret
+  $token = Get-GraphTokenFromEnv
+  Write-Host "Auth method: $($authContext.AuthMethod)" -ForegroundColor Gray
   
   $headers = @{
-    Authorization = "Bearer $token"
-    ContentType   = 'application/json'
+    ContentType = 'application/json'
+  }
+  if ($authContext.AuthMethod -ne 'Delegated') {
+    $headers.Authorization = "Bearer $token"
   }
   
   $policies = Get-CAPolicies -Headers $headers

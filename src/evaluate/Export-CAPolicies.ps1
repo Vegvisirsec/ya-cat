@@ -33,7 +33,7 @@ function Get-RequiredEnv {
 
 function Invoke-Graph {
   param([string]$Uri, [hashtable]$Headers)
-  return Invoke-RestMethod -Method GET -Uri $Uri -Headers $Headers -ContentType 'application/json'
+  return Invoke-GraphRequest -Method GET -Uri $Uri -Headers $Headers -Body $null -AuthContext $script:authContext
 }
 
 function Get-AllPolicies {
@@ -59,10 +59,7 @@ function Get-SafeName {
 }
 
 Load-EnvFile -Path $EnvFile
-$tenantId = Get-RequiredEnv -Name 'TENANT_ID'
-$clientId = Get-RequiredEnv -Name 'CLIENT_ID'
-$clientSecret = Get-RequiredEnv -Name 'CLIENT_SECRET'
-$scope = Get-RequiredEnv -Name 'GRAPH_SCOPE'
+$authContext = Get-GraphAuthContextFromEnv
 
 if ([string]::IsNullOrWhiteSpace($OutputFolder)) {
   $ts = Get-Date -Format 'yyyyMMdd-HHmmss'
@@ -71,8 +68,9 @@ if ([string]::IsNullOrWhiteSpace($OutputFolder)) {
 
 New-Item -ItemType Directory -Force -Path $OutputFolder | Out-Null
 
-$token = Get-GraphToken -TenantId $tenantId -ClientId $clientId -ClientSecret $clientSecret -Scope $scope
-$headers = @{ Authorization = "Bearer $token" }
+$token = Get-GraphTokenFromEnv
+Write-Host "Authenticated to Graph using method: $($authContext.AuthMethod)"
+$headers = if ($authContext.AuthMethod -eq 'Delegated') { @{} } else { @{ Authorization = "Bearer $token" } }
 $policies = Get-AllPolicies -Headers $headers
 
 if ($SingleFile) {

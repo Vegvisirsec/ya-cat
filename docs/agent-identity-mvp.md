@@ -54,6 +54,6 @@ Suggested first version:
 
 ## Future Direction
 
-- add approval register export to context packages
+- add approval register export to standard repo outputs
 - add advisory evaluation for approved versus unapproved agent identities
 - define tenant-local automation for approved exceptions after the discovery phase is stable

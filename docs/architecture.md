@@ -32,15 +32,15 @@ The toolbox supports pluggable authentication through `src/common/Authentication
 - Trade-offs: Requires certificate infrastructure; better for compliance and multi-tenant
 
 ### Delegated (user-context auth)
-- Method: Interactive OAuth2 flow using MSAL.PS
+- Method: Interactive Graph PowerShell flow using `Connect-MgGraph`
 - Scope: Audit, evaluation, and compliance scenarios
 - Setup: Requires interactive user sign-in; user context appears in logs
 - Rotation: No credential rotation needed; uses signed-in user's token
-- Trade-offs: Not suitable for unattended automation; requires MSAL.PS module
+- Trade-offs: Not suitable for unattended automation; requires Microsoft Graph PowerShell auth module
 
 **Using different auth methods:**
 
-Each script accepts `Get-GraphToken` calls that are compatible across all three methods. To switch methods, modify your `.env.local` file or pass appropriate parameters. Details on per-script configuration are in [src/graph/README.md](../src/graph/README.md) and deployment scripts.
+Each script resolves auth from `.env.local`. Set `AUTH_METHOD` to `ClientSecret`, `ClientCertificate`, or `Delegated`, then provide the matching credential material. Details on per-script configuration are in [src/graph/README.md](../src/graph/README.md) and deployment scripts.
 
 ## Multi-tenant considerations
 
@@ -69,10 +69,7 @@ The project is split into four layers:
 3. deployment engine
 4. evaluation engine
 
-The evaluation engine now has two parts:
-
-1. deterministic export and comparison
-2. local advisory interpretation using a context package
+The evaluation engine focuses on deterministic export and comparison.
 
 ## Policy tiers
 
@@ -142,25 +139,12 @@ Current evaluation model:
 - export report artifacts (CSV, JSON, or HTML)
 
 Advisory evaluation direction:
-- generate a tenant context package from exported policy state and supporting tenant metadata
 - use repository policy definitions as the desired-state reference
-- provide the context package to a local LLM under [`instructions.md`](../instructions.md)
-- validate structured findings against [`findings-schema.json`](../findings-schema.json)
-- treat the model as an interpretation and recommendation layer, not as the factual comparison engine
+- treat interpretation as a reviewer task outside the repository automation
 
 Compare mode status:
 - `Compare` mode is currently experimental and not yet reliable for exact equivalence reporting.
 - Treat `Compare` output as directional coverage only, not as a deployment or compliance gate.
-
-Target context package contents:
-- desired-state policy set
-- exported tenant policy set
-- normalized summaries and comparison output
-- tenant size and population shape
-- privileged role and break-glass context
-- exclusion and assignment ratios
-- agent identity governance context, when present
-- named location and other relevant CA metadata
 
 ## Utility Scripts
 

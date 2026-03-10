@@ -6,7 +6,6 @@ This folder contains reusable instructions for evaluating individual Conditional
 
 Use these guides when:
 - reviewing one deployed tenant policy against one repository template
-- asking a local LLM to assess whether a tenant implementation is materially effective
 - creating evaluation guidance for newly added policy templates
 
 ## Reusable Assets

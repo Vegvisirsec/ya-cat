@@ -41,8 +41,11 @@ This script is designed with privacy as a core principle:
    ```
    TENANT_ID=<your-tenant-id>
    CLIENT_ID=<your-app-client-id>
+   AUTH_METHOD=ClientSecret
    CLIENT_SECRET=<your-app-client-secret>
    ```
+
+   For certificate auth, set `AUTH_METHOD=ClientCertificate` and provide `CERTIFICATE_THUMBPRINT` or `CERTIFICATE_PATH` (+ `CERTIFICATE_PASSWORD` if needed). For interactive sign-in, set `AUTH_METHOD=Delegated`.
 
 3. **Authentication**: This script supports multiple authentication methods (client secret, certificate, delegated). See [../common/README.md](../common/README.md) for setup details and alternatives to client secret authentication.
 
@@ -191,9 +194,10 @@ Ensure `.env.local` file exists and contains valid credentials. See [Configurati
 
 #### "Failed to acquire Graph access token"
 Check that:
-- Client credentials in `.env.local` are correct
-- The app registration has not expired
-- The app is not disabled in Azure AD
+- `.env.local` matches the selected `AUTH_METHOD`
+- Client secret or certificate material is valid if using app-only auth
+- The app registration has not expired and is not disabled in Azure AD
+- `Microsoft.Graph.Authentication` is installed if using delegated auth
 
 #### "No locations found in sign-in logs"
 Possible causes:
@@ -268,8 +272,11 @@ By default, the script respects privacy:
    ```
    TENANT_ID=<your-tenant-id>
    CLIENT_ID=<your-app-client-id>
+   AUTH_METHOD=ClientSecret
    CLIENT_SECRET=<your-app-client-secret>
    ```
+
+   For certificate auth, set `AUTH_METHOD=ClientCertificate` and provide `CERTIFICATE_THUMBPRINT` or `CERTIFICATE_PATH` (+ `CERTIFICATE_PASSWORD` if needed). For interactive sign-in, set `AUTH_METHOD=Delegated`.
 
 3. **Authentication**: This script supports multiple authentication methods (client secret, certificate, delegated). See [../common/README.md](../common/README.md) for setup details and alternatives to client secret authentication.
 
@@ -415,8 +422,9 @@ The script evaluates sign-ins against policy conditions:
 - If errors persist, re-run the script after waiting a few minutes
 
 #### "Failed to authenticate"
-- Verify `.env.local` contains correct credentials
-- Ensure the app registration and secret have not expired
+- Verify `.env.local` contains the correct values for the selected `AUTH_METHOD`
+- Ensure the app registration and secret/certificate have not expired
+- Install `Microsoft.Graph.Authentication` if you are using delegated interactive auth
 
 ### Next Steps
 
