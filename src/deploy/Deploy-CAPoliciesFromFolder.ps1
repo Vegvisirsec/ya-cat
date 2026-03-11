@@ -81,7 +81,7 @@ function Remove-NullAndOData {
   if ($Value -is [System.Collections.IDictionary]) {
     $clean = @{}
     foreach ($k in @($Value.Keys)) {
-      if ([string]$k -like '@odata*') { continue }
+      if ([string]$k -like '@odata*' -or [string]$k -like '*@odata*') { continue }
       $v = Remove-NullAndOData -Value $Value[$k]
       if ($null -ne $v) { $clean[$k] = $v }
     }

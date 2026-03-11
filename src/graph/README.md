@@ -439,3 +439,129 @@ The script evaluates sign-ins against policy conditions:
 - [Discover-SignInLocations.ps1](./Discover-SignInLocations.ps1)
 - [Deployment Script](../deploy/Deploy-CAPolicies.ps1)
 - [Policy Catalog](../docs/policy-catalog.md)
+
+---
+
+## Analyze-CAExclusionExposure.ps1
+
+Reviews a policy exclusion as an exception-management problem: select a Conditional Access policy, expand resolvable excluded identities, inspect one identity's recent sign-ins, and generate a report-only draft policy scoped to that identity.
+
+### Purpose
+
+- Enumerates Conditional Access policies in the tenant
+- Resolves direct excluded users and users reached through excluded groups
+- Samples large excluded groups to avoid runaway analysis volume
+- Lets the operator choose a single excluded identity for analysis
+- Pulls that identity's sign-in evidence for a configurable lookback window
+- Produces:
+  - a JSON summary with sign-in patterns, unsupported exclusions, and consultant-style warnings
+  - a CSV export of the selected identity's sign-ins
+  - a recommended Conditional Access policy payload scoped to that one identity
+  - a ranked list of proposal options with heuristic scores so the narrowest viable opening appears first
+  - output file names and the proposed policy name derived from the original policy identifier so the relationship stays obvious
+
+### Security Positioning
+
+This script is intentionally advisory, not autonomous remediation.
+
+- The generated policy remains `enabledForReportingButNotEnforced`
+- The draft preserves the parent policy's control intent and only narrows application scope when the evidence is limited enough to do so conservatively
+- If the source policy is a browser-based `block` policy for `Office365`, the draft becomes an app-enforced restriction complement instead of another block policy
+- Break-glass or emergency-style identities are flagged for manual review
+- Role-based exclusions are reported as unsupported for deep expansion in this version
+- The current recommendation engine is not trustworthy enough for production decision-making and should be treated as dev/test only
+
+### Prerequisites
+
+1. Azure app registration with the following Graph permissions:
+
+| Permission | Type | Reason |
+|-----------|------|--------|
+| `Policy.Read.All` | Application | Read Conditional Access policy definitions |
+| `AuditLog.Read.All` | Application | Read sign-in logs for the selected excluded identity |
+| `Directory.Read.All` | Application | Resolve excluded users and group members |
+| `Group.Read.All` | Application | Read excluded group membership |
+
+2. `.env.local` configured for `ClientSecret`, `ClientCertificate`, or `Delegated` auth, consistent with the other scripts in this repo.
+
+### Usage
+
+Interactive:
+
+```powershell
+.\Analyze-CAExclusionExposure.ps1
+```
+
+Specify policy and principal directly:
+
+```powershell
+.\Analyze-CAExclusionExposure.ps1 `
+  -PolicyId "00000000-0000-0000-0000-000000000000" `
+  -PrincipalId "11111111-1111-1111-1111-111111111111" `
+  -DaysPast 45
+```
+
+### Parameters
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `EnvFile` | string | `.env.local` | Path to environment variables file |
+| `DaysPast` | int | 30 | Number of days of sign-ins to inspect |
+| `PolicyId` | string | (empty) | Optional policy object ID or display name to skip the policy menu |
+| `PrincipalId` | string | (empty) | Optional excluded user object ID to skip the identity menu |
+| `OutputFolder` | string | `output/ca-exclusion-exposure-<timestamp>` | Folder for generated evidence and proposal files |
+| `MaxObservedApplications` | int | 8 | Maximum number of observed apps allowed before the draft keeps the parent policy's broader app scope |
+| `MaxSampledUsersPerExcludedGroup` | int | 5 | Maximum number of users sampled from a single excluded group before the script randomly caps the analysis set |
+
+### Output
+
+- `<policy-code>-exclusion-complement-<principal>.analysis-summary.json`: selected policy, selected identity, unsupported exclusions, sign-in summary, ranked options, proposal notes, and risk flags
+- `<policy-code>-exclusion-complement-<principal>.selected-identity-signins.csv`: sign-in evidence for the selected identity
+- `<policy-code>-exclusion-complement-<principal>.recommended-policy.json`: highest-ranked report-only proposal
+- `<policy-code>-exclusion-complement-<principal>.proposal-options.json`: all scored proposal options in ranked order
+
+### Current Limitations
+
+1. Role-based exclusions are surfaced as unsupported instead of being expanded to users.
+2. Outside the browser-plus-Office365 unmanaged-access pattern, the draft still does not reliably infer new location, device, or risk controls from sign-in logs.
+3. Group-based exclusions are weak training data for this workflow. The script evaluates a selected member, not the entire group operating model, so representativeness falls off quickly as the excluded group gets larger or more diverse.
+4. This is still an analyst workflow. You should validate break-glass handling, recovery paths, licensing, and workload dependencies before deployment.
+5. If an excluded group has more than `MaxSampledUsersPerExcludedGroup` users, the script randomly samples users instead of expanding the whole group. This keeps the analysis tractable, but it further reduces representativeness for large groups.
+
+### Advisory Warning
+
+- This workflow is strongest for individual-user exclusions and narrow, deterministic controls.
+- It is materially less reliable for large exclusion groups because one selected member is rarely a good proxy for the whole group's resource usage.
+- Start with critical policies and crisp control objectives, such as legacy-authentication blocking or other exclusions tied to a single well-understood user.
+- Treat group-based proposals as directional only unless you validate multiple representative members or redesign the exception boundary at the group level.
+- Do not use the generated recommendations as a production automation source at this stage. Validate them manually in non-production first.
+
+### Exclusion Hardening Workflow
+
+Use this script as part of a controlled hardening workflow for broad Conditional Access exclusions.
+
+1. Select the original Conditional Access policy that currently contains the exclusion.
+2. Select the excluded identity to analyze.
+   Prefer an individual user before attempting group-based exclusions.
+3. Run the script and review the ranked proposal options.
+4. Choose the narrowest option that still preserves the identity's legitimate access path.
+5. Deploy the selected complementary policy in `enabledForReportingButNotEnforced`.
+6. Observe it for a realistic validation window.
+   `30 days` is a good default, but longer may be needed for infrequent workflows.
+7. Review:
+   - report-only failures
+   - report-only successes
+   - app, location, platform, and client-type patterns
+   - interactions with other Conditional Access policies
+8. Decide whether the complementary policy should coexist with the original exclusion or replace it.
+   In many valid Conditional Access designs, the original broad exclusion remains in place while the complementary policy trims the excluded identity's remaining access surface.
+9. Enable the complementary policy and monitor again after enforcement.
+
+Important operating rule:
+- A complementary policy does not override an applicable broad block policy.
+- If the design depends on preserving an exception path, the original broad exclusion often remains in place while a narrower complementary policy reduces the remaining attack surface.
+- Only remove the identity from the original broad exclusion if the complementary design still works when the original broad policy also applies.
+
+Recommended rollout order:
+- Start with critical policies and simpler decision boundaries, such as legacy authentication block.
+- Move to group-based exclusions only after validating the method on individual users.
