@@ -1,3 +1,4 @@
+```text
 +--------------------------------------------------------------+
 | ya-cat : Yet Another Conditional Access Toolkit              |
 +--------------------------------------------------------------+
@@ -13,6 +14,8 @@
 |                                                              |
 |      Yet Another Conditional Access Toolkit                  |
 +--------------------------------------------------------------+
+```
+
 Portable Conditional Access policy definitions, deployment helpers, export utilities, and reviewer guidance for Microsoft 365 environments.
 
 ## What it does
